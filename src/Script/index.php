@@ -85,3 +85,23 @@ EOL;
     }
 }
 
+switch ($_POST['action']) {
+    case 'setPricing':
+        /**
+         * Set pricing
+         */
+        break;
+
+    case 'setDeals':
+        /**
+         * set deals
+         */
+        break;
+
+    case 'scanItem':
+        /**
+         * scan item and get total
+         */
+        break;
+}
+

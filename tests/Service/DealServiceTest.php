@@ -1,7 +1,7 @@
 <?php
 
 use Awin\Common\Service\ApiAbstractService;
-use Awin\Service\CurrencyWebserviceService;
+use Awin\Service\DealService;
 use PHPUnit\Framework\TestCase;
 
 class CurrencyWebserviceServiceTest extends TestCase
@@ -15,7 +15,7 @@ class CurrencyWebserviceServiceTest extends TestCase
      */
     public function testSetValueApi($parameter, $expected): void
     {
-        $mock = $this->getMockBuilder(CurrencyWebserviceService::class)
+        $mock = $this->getMockBuilder(DealService::class)
             ->disableOriginalConstructor()
             ->getMock();
 
