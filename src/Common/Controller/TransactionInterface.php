@@ -1,8 +1,8 @@
 <?php
-namespace Awin\Common\Controller;
+namespace Irm\Common\Controller;
 
 /**
- * Declaring the methods needed to display transactions
+ * Declaring the methods needed to display transaction totals
  *
  * Interface TransactionInterface
  * @package Common\Controller
@@ -10,17 +10,23 @@ namespace Awin\Common\Controller;
 interface TransactionInterface
 {
     /**
-     * Get all transactions
+     * Set the pricing per product id
      *
      * @return mixed
      */
-    public function getTransactions();
+    public function setPricing();
 
     /**
-     * Get transaction row by id
+     * Get the item by it's id
      *
-     * @param $id
      * @return mixed
      */
-    public function getTransactionsByMerchant($id);
+    public function scanItem();
+
+    /**
+     * Retrieves the total cost of items
+     *
+     * @return mixed
+     */
+    public function getTotal();
 }

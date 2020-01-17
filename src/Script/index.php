@@ -1,107 +1,30 @@
 <?php
 
-use Awin\Controller\MerchantController;
+use Irm\Controller\ItemController;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
-require_once __DIR__ . '/../../vendor/phplucidframe/console-table/src/LucidFrame/Console/ConsoleTable.php';
+$params = $_GET;
 
-/**
- * Print transactions
- */
+if (isset($params['action'])) {
+    $items = new itemController();
 
-if (!function_exists('readline')) {
-    function readline($question)
-    {
-        $fh = fopen('php://stdin', 'r');
-        echo $question;
-        $userInput = trim(fgets($fh));
-        fclose($fh);
-
-        return $userInput;
+    switch ($params['action']) {
+        case 'setPricing':
+            $items->setPricing();
+            break;
+        case 'scanItem':
+            $items->scanItem();
+            break;
+        case 'getTotal':
+            $items->getTotal();
+            break;
+        case 'destroySession':
+            session_destroy();
+            break;
+        default:
+            $items->setPricing();
     }
-}
-
-displayTransactions();
-
-function displayTransactions()
-{
-    $merchant = new MerchantController();
-    $transactionAnswer = readline('Do you want to list all transactions? Answer Y/N: ');
-    $table = new LucidFrame\Console\ConsoleTable();
-    $table
-        ->addHeader('Merchant')
-        ->addHeader('Date')
-        ->addHeader('Value');
-
-    if ($transactionAnswer === 'Y' || $transactionAnswer === 'y') {
-        foreach ($merchant->getTransactions() as $transaction) {
-            $table
-                ->addRow()
-                ->addColumn($transaction['merchant'])
-                ->addColumn($transaction['date'])
-                ->addColumn($transaction['value']);
-        }
-
-        $table->display();
-        echo <<<EOL
-
-EOL;
-
-        $exitAnswer = readline(' do you want to exit? Answer Y/N: ');
-
-        if ($exitAnswer === 'Y' || $exitAnswer === 'y') {
-            exit();
-        } else {
-            displayTransactions();
-        }
-    } else if ($transactionAnswer === 'N' || $transactionAnswer === 'n') {
-        $merchantId      = readline('What is the merchant id you would like to view? ');
-        $merchantResults = $merchant->getTransactionsByMerchant($merchantId);
-
-        if (!empty($merchantResults)) {
-            foreach ($merchantResults as $transaction) {
-                $table
-                    ->addRow()
-                    ->addColumn($transaction['merchant'])
-                    ->addColumn($transaction['date'])
-                    ->addColumn($transaction['value']);
-            }
-
-            $table->display();
-            echo <<<EOL
-
-EOL;
-        }
-
-        $exitAnswer = readline(' do you want to exit? Answer Y/N: ');
-
-        if ($exitAnswer === 'Y' || $exitAnswer === 'y') {
-            exit();
-        } else {
-            displayTransactions();
-        }
-    } else {
-        displayTransactions();
-    }
-}
-
-switch ($_POST['action']) {
-    case 'setPricing':
-        /**
-         * Set pricing
-         */
-        break;
-
-    case 'setDeals':
-        /**
-         * set deals
-         */
-        break;
-
-    case 'scanItem':
-        /**
-         * scan item and get total
-         */
-        break;
+} else {
+    throw new Exception('Please enter an action either; setPricing, scanItem or getTotal');
 }
 

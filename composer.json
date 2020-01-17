@@ -1,6 +1,6 @@
 {
-    "name": "awinTest",
-    "description": "Transaction Report",
+    "name": "irmTest",
+    "description": "Listing total amounts of products scanned",
     "type": "PHP",
     "require": {
         "php": "7.3.*",
@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Awin\\": "src/"
+            "Irm\\": "src/"
         }
     },
     "require-dev": {

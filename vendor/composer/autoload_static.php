@@ -37,14 +37,14 @@ class ComposerStaticInitf9fc7e38b93793b71904acd46b0c8b9a
             'Psr\\Log\\' => 8,
             'Prophecy\\' => 9,
         ),
+        'I' => 
+        array (
+            'Irm\\' => 4,
+        ),
         'D' => 
         array (
             'Doctrine\\Instantiator\\' => 22,
             'DeepCopy\\' => 9,
-        ),
-        'A' => 
-        array (
-            'Awin\\' => 5,
         ),
     );
 
@@ -99,6 +99,10 @@ class ComposerStaticInitf9fc7e38b93793b71904acd46b0c8b9a
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
         ),
+        'Irm\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
@@ -106,10 +110,6 @@ class ComposerStaticInitf9fc7e38b93793b71904acd46b0c8b9a
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
-        ),
-        'Awin\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

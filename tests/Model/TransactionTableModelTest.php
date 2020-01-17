@@ -1,187 +1,180 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Awin\Model\TransactionTableModel;
+use Irm\Model\TransactionTableModel;
 
 class TransactionTableModelTest extends TestCase
 {
 
     private $returnedTransactionArray = array(
-        array(
-            'merchant' => 1,
-            'date'     => '01/01/2020',
-            'value'    => '(GBP) £2500'
-        )
+       'AZ' => 2
     );
 
     /**
-     * @dataProvider merchantProvider
+     * @dataProvider itemProvider
      *
      * @param $parameter
      * @param $expectedMessage
      * @throws ReflectionException
      */
-    public function testSetMerchant($parameter, $expectedMessage): void
+    public function testSetItemId($parameter, $expectedMessage): void
     {
         $reflector = new \ReflectionClass(TransactionTableModel::class);
         $instance  = $reflector->newInstanceWithoutConstructor();
-        $method    = $reflector->getMethod('setMerchant');
+        $method    = $reflector->getMethod('setItemId');
         $method->setAccessible(true);
         $this->expectExceptionMessage($expectedMessage);
         $method->invoke($instance, $parameter);
     }
 
-    public function merchantProvider()
+    public function itemProvider()
     {
         return [
-            ['Testing', 'Merchant is required and needs to be a positive number'],
-            ['', 'Merchant is required and needs to be a positive number'],
-            [array(), 'Merchant is required and needs to be a positive number'],
-            [-12, 'Merchant is required and needs to be a positive number']
+            [null, 'Item id is required']
         ];
     }
 
     /**
-     * @dataProvider merchantWithoutExceptionProvider
+     * @dataProvider itemWithoutExceptionProvider
      *
      * @param $parameter
      * @param $expected
      * @throws Exception
      */
-    public function testSetMerchantWithoutException($parameter, $expected): void
+    public function testSetItemIdWithoutException($parameter, $expected): void
     {
         $reflector = new \ReflectionClass(TransactionTableModel::class);
         $instance  = $reflector->newInstanceWithoutConstructor();
-        $method    = $reflector->getMethod('setMerchant');
+        $method    = $reflector->getMethod('setItemId');
         $method->setAccessible(true);
 
         $this->assertEquals($expected, $method->invoke($instance, $parameter));
     }
 
-    public function merchantWithoutExceptionProvider()
+    public function itemWithoutExceptionProvider()
     {
         return [
-            [2, 2],
+            ['Testing', 'Testing'],
             [3, 3],
             [10, 10],
             [100, 100]
         ];
     }
 
-    public function testGetMerchant(): void
+    public function testGetItemId(): void
     {
         $mockedClass = $this->createMock(TransactionTableModel::class);
-        $mockedClass->method('getMerchant')
-            ->willReturn(1);
-        $this->assertEquals(1, $mockedClass->getMerchant());
+        $mockedClass->method('getItemId')
+            ->willReturn(array(1));
+        $this->assertEquals(array(1), $mockedClass->getItemId());
     }
 
     /**
-     * @dataProvider dateProvider
+     * @dataProvider priceProvider
      *
      * @param $parameter
      * @param $expectedMessage
      * @throws ReflectionException
      */
-    public function testSetDate($parameter, $expectedMessage): void
+    public function testSetPrice($parameter, $expectedMessage): void
     {
         $reflector = new \ReflectionClass(TransactionTableModel::class);
         $instance  = $reflector->newInstanceWithoutConstructor();
-        $method    = $reflector->getMethod('setDate');
+        $method    = $reflector->getMethod('setPrice');
         $method->setAccessible(true);
         $this->expectExceptionMessage($expectedMessage);
         $method->invoke($instance, $parameter);
     }
 
-    public function dateProvider()
+    public function priceProvider()
     {
         return [
-            ['2020/01/01', 'Date has to be valid and can not be null'],
-            ['', 'Date has to be valid and can not be null'],
-            [-12, 'Date has to be valid and can not be null']
+            [null, 'Price is required and needs to be a positive number'],
+            [0, 'Price is required and needs to be a positive number'],
+            [-12, 'Price is required and needs to be a positive number']
         ];
     }
 
     /**
-     * @dataProvider dateWithoutExceptionProvider
+     * @dataProvider priceWithoutExceptionProvider
      *
      * @param $parameter
      * @param $expected
      * @throws Exception
      */
-    public function testSetDateWithoutException($parameter, $expected): void
+    public function testSetPriceWithoutException($parameter, $expected): void
     {
         $reflector = new \ReflectionClass(TransactionTableModel::class);
         $instance  = $reflector->newInstanceWithoutConstructor();
-        $method    = $reflector->getMethod('setDate');
+        $method    = $reflector->getMethod('setPrice');
         $method->setAccessible(true);
 
         $this->assertEquals($expected, $method->invoke($instance, $parameter));
     }
 
-    public function dateWithoutExceptionProvider()
+    public function priceWithoutExceptionProvider()
     {
         return [
-            ['01/01/2020', '01/01/2020'],
-            ['15/01/2020', '15/01/2020'],
-            ['01/06/2020', '01/06/2020'],
-            ['03/07/2020', '03/07/2020']
+            [1, 1],
+            ['1', '1'],
+            [2, 2],
+            ['2', '2']
         ];
     }
 
-    public function testGetDate(): void
+    public function testGetPrice(): void
     {
         $mockedClass = $this->createMock(TransactionTableModel::class);
-        $mockedClass->method('getDate')
-            ->willReturn('01/01/2020');
-        $this->assertEquals('01/01/2020', $mockedClass->getDate());
+        $mockedClass->method('getPrice')
+            ->willReturn($this->returnedTransactionArray['AZ']);
+        $this->assertEquals(2, $mockedClass->getPrice('AZ'));
     }
 
     /**
-     * @dataProvider valueProvider
+     * @dataProvider itemsProvider
      *
      * @param $parameter
      * @param $expectedMessage
      * @throws ReflectionException
      */
-    public function testSetValue($parameter, $expectedMessage): void
+    public function testFetchItemsById($parameter, $expectedMessage): void
     {
         $reflector = new \ReflectionClass(TransactionTableModel::class);
         $instance  = $reflector->newInstanceWithoutConstructor();
-        $method    = $reflector->getMethod('setValue');
+        $method    = $reflector->getMethod('fetchItemsById');
         $method->setAccessible(true);
         $this->expectExceptionMessage($expectedMessage);
         $method->invoke($instance, $parameter);
     }
-    public function valueProvider()
+    public function itemsProvider()
     {
         return [
-            [null, 'Value can not be null'],
-            ['abcdefg', 'Value needs to be a valid currency type']
+            [null, 'Unable to find item'],
+            ['abcdefg', 'Unable to find item']
         ];
     }
 
-    public function testGetValue(): void
+    public function testFetchItemsByIdWithoutException(): void
     {
         $mockedClass = $this->createMock(TransactionTableModel::class);
-        $mockedClass->method('getValue')
-            ->willReturn(1000);
-        $this->assertEquals(1000, $mockedClass->getValue());
+        $mockedClass->method('fetchItemsById')
+            ->willReturn(2);
+        $this->assertEquals(2, $mockedClass->fetchItemsById('AZ'));
     }
 
-    public function testFetchTransactions(): void
+    public function testSetPricing(): void
     {
         $mockedClass = $this->createMock(TransactionTableModel::class);
-        $mockedClass->method('fetchTransactions')
-            ->willReturn($this->returnedTransactionArray);
-        $this->assertEquals($this->returnedTransactionArray, $mockedClass->fetchTransactions());
+        $mockedClass->method('setPricing')
+            ->willReturn(array(array('AZ' => 2)));
+        $this->assertEquals(array(array('AZ' => 2)), $mockedClass->setPricing(array('itemId' => 'AZ', 'price' => 2)));
     }
 
-    public function testFetchTransactionsById(): void
+    public function testGetTotal(): void
     {
         $mockedClass = $this->createMock(TransactionTableModel::class);
-        $mockedClass->method('fetchTransactionByMerchantId')
-            ->willReturn($this->returnedTransactionArray);
-        $this->assertEquals($this->returnedTransactionArray, $mockedClass->fetchTransactionByMerchantId(1));
+        $mockedClass->method('getTotal')
+            ->willReturn('Total: £2');
+        $this->assertEquals('Total: £2', $mockedClass->getTotal());
     }
 }

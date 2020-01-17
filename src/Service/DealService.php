@@ -1,32 +1,35 @@
 <?php
- namespace Awin\Service;
-
- use Awin\Common\Service\ApiAbstractService;
+ namespace Irm\Service;
 
  /**
-  * Dummy web service returning random exchange rates
+  * Dummy web service retrieving deals
   *
-  * Class CurrencyWebservice
-  * @package Service
+  * Class DealService
+  * @package Irm\Service
   */
-class CurrencyWebserviceService extends ApiAbstractService
+class DealService
 {
-    public function __construct()
-    {
-        setlocale(LC_MONETARY,"en_GB");
-    }
 
     /**
-     * Get the GBP exchange rate from given value
+     * Retrieve deals by item id and its quantity
      *
-     * @param $currency
-     * @return string
+     * @param $itemId
+     * @param $quantity
+     * @param $price
+     * @return int
      */
-    public function getExchangeRate($currency)
+    public function getDeals($itemId, $quantity, $price)
     {
-        $response     = $this->sendRequest('http://exchangerate.com/api', array('value' => $currency), 'post');
-        $returnString = money_format("%i", $response);
+        if (in_array($itemId, array('ZA', 'FC'))) {
+            if ($itemId === 'ZA' && $quantity % 4 == 0) {
+                $price = 7;
+            }
 
-        return str_replace('GBP', '(GBP) £', $returnString);
+            if ($itemId === 'FC' && $quantity % 6 == 0) {
+                $price = 6;
+            }
+        }
+
+        return $price;
     }
 }

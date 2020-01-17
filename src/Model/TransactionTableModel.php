@@ -1,44 +1,41 @@
 <?php
-namespace Awin\Model;
+
+namespace Irm\Model;
 
 use Exception;
-use Awin\Service\CurrencyWebserviceService;
+use Irm\Common\Model\AbstractModel;
+use Irm\Service\DealService;
 
 /**
  * Class TransactionTable
  * @package Model
  */
-class TransactionTableModel
+class TransactionTableModel extends AbstractModel
 {
     /**
-     * @var int
-     */
-    private $merchant;
-
-    /**
      * @var string
      */
-    private $date;
+    private $itemId;
 
     /**
      * @var int
      */
-    private $value;
-
-    /**
-     * @var string
-     */
-    private $fileSource;
+    private $price;
 
     /**
      * @var array
      */
-    private $rows;
+    private $items;
 
     /**
-     * @var CurrencyWebservice
+     * @var int
      */
-    private $currencyService;
+    private $total;
+
+    /**
+     * @var DealService
+     */
+    private $dealService;
 
     /**
      * TransactionTable constructor.
@@ -46,178 +43,164 @@ class TransactionTableModel
      */
     public function __construct()
     {
-        $this->merchant         = 0;
-        $this->date             = '';
-        $this->value            = 0;
-        $this->fileSource       = __DIR__.'/../../data/data.csv';
-        $this->rows             = array();
-        $this->currencyService  = new CurrencyWebserviceService();
+        session_start();
+        $this->itemId       = array();
+        $this->price        = array();
+        $this->items        = array();
+        $this->total        = 0;
+        $this->dealService  = new DealService();
     }
 
     /**
-     * Set the merchant variable type
+     * Set the item id
      *
-     * @param $merchant
+     * @param $id
+     * @return string
+     * @throws Exception
+     */
+    private function setItemId($id): string
+    {
+        if (is_null($id)) {
+            throw new Exception('Item id is required');
+        }
+
+        return $this->itemId[] = $id;
+    }
+
+    /**
+     * Retrieve item id
+     *
+     * @return array|string
+     */
+    public function getItemId()
+    {
+        return $this->itemId;
+    }
+
+    /**
+     * set the price value
+     *
+     * @param $price
      * @return int
      * @throws Exception
      */
-    private function setMerchant($merchant): int
+    private function setPrice($price): int
     {
-        if (is_null($merchant) || !is_numeric($merchant) || $merchant <= 0) {
-            throw new Exception('Merchant is required and needs to be a positive number');
+        if (is_null($price) || !is_numeric($price) || $price <= 0) {
+            throw new Exception('Price is required and needs to be a positive number');
         }
 
-        return $this->merchant = addslashes($merchant);
+        return $this->price[] = $price;
     }
 
     /**
-     * Retrieve merchant id
+     * Retrieve price
      *
+     * @param $id
+     * @return mixed
+     */
+    public function getPrice($id)
+    {
+        return $this->price[$id];
+    }
+
+    /**
+     * Fetch and validate items by id
+     *
+     * @param $ids
      * @return int
-     */
-    public function getMerchant(): int
-    {
-        return stripslashes($this->merchant);
-    }
-
-    /**
-     * Set the date variable type
-     *
-     * @param $date
-     * @return mixed
      * @throws Exception
      */
-    private function setDate($date): string
+    public function fetchItemsById($ids): int
     {
-        $dateSplit = explode('/', $date);
+        $found     = false;
+        $scanCount = 1;
 
-        if (empty($date) || is_int($date) || checkdate($dateSplit[1], $dateSplit[0], $dateSplit[2]) === false) {
-            throw new Exception('Date has to be valid and can not be null');
+        if (is_array($ids) === false) {
+            $ids = (array)$ids;
         }
 
-        return $this->date = $date;
-    }
-
-    /**
-     * Retrieve date
-     *
-     * @return string
-     */
-    public function getDate(): string
-    {
-        return $this->date;
-    }
-
-    /**
-     * Set the value variable type
-     *
-     * @param $value
-     * @return mixed
-     * @throws Exception
-     */
-    private function setValue($value): string
-    {
-        if (is_null($value)) {
-            throw new Exception('Value can not be null');
+        if (empty($this->items)) {
+            $found = false;
         }
 
-        $rawCurrency = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        if (isset($_SESSION['data'])) {
+            foreach ($_SESSION['data'] as $itemArray) {
+                foreach ($ids as $id) {
+                    if (array_key_exists($id, $itemArray)) {
 
-        if ($this->isCurrency($rawCurrency) == false) {
-            throw new Exception('Value needs to be a valid currency type');
-        }
+                        if ($id === 'ZA' && $scanCount % 4 == 0 || $id === 'FC' && $scanCount % 6 == 0) {
+                            $this->total = $this->dealService->getDeals($id, $scanCount, $itemArray[$id]);
+                        } else {
+                            $this->total += $this->dealService->getDeals($id, $scanCount, $itemArray[$id]);
+                        }
 
-        return $this->value = $this->currencyService->getExchangeRate($rawCurrency);
-    }
-
-    /**
-     * Retrieve value
-     *
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
-
-    /**
-     * Check a valid currency type
-     *
-     * @param $number
-     * @return false|int
-     */
-    private function isCurrency($number): int
-    {
-        return preg_match("/^-?[0-9]+(?:\.[0-9]{1,2})?$/", $number);
-    }
-
-    /**
-     * Fetch all transactions
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function fetchTransactions(): array
-    {
-        if (($handle = fopen($this->fileSource, "r")) !== false) {
-            $row = 0;
-            while (($data[] = fgetcsv($handle, 1000, ";")) !== false) {
-
-                if ($row > 0) {
-                    $this->setMerchant($data[$row][0]);
-                    $this->setDate($data[$row][1]);
-                    $this->setValue($data[$row][2]);
-
-                    $this->rows[] = array(
-                        'merchant' => $this->getMerchant(),
-                        'date'     => $this->getDate(),
-                        'value'    => $this->getValue()
-                    );
-                }
-
-                $row++;
-            }
-        }
-
-        return $this->rows;
-    }
-
-    /**
-     * Fetch transaction row by merchant id
-     *
-     * @param $merchant
-     * @return array
-     * @throws Exception
-     */
-    public function fetchTransactionByMerchantId($merchant): array
-    {
-        $this->setMerchant($merchant);
-        $found = false;
-
-        if (($handle = fopen($this->fileSource, "r")) !== false) {
-            $row = 0;
-            while (($data[] = fgetcsv($handle, 1000, ";")) !== false) {
-
-                if (($row > 0 && $found === false) || !empty($this->rows)) {
-                    if ($data[$row][0] == $this->getMerchant()) {
-                        $this->rows[] = array(
-                            'merchant' => $data[$row][0],
-                            'date'     => $data[$row][1],
-                            'value'    => $this->setValue($data[$row][2])
-                        );
-
+                        $scanCount += 1;
                         $found = true;
                     }
                 }
-
-                $row++;
-            }
-
-            if ($found === false) {
-                throw new Exception('Unable to find transaction');
             }
         }
 
-        return $this->rows;
+        if ($found === false) {
+            throw new Exception('Unable to find item');
+        }
+
+        $_SESSION['total'] = $this->total;
+
+        return $_SESSION['total'];
     }
+
+    /**
+     * Set the pricing per item
+     *
+     * @param $itemParams
+     * @return array
+     */
+    public function setPricing($itemParams)
+    {
+        if (is_array($itemParams) === false) {
+            $itemParams = (array)$itemParams;
+        }
+
+        $this->setAttributes($itemParams['itemId'], 'setItemId');
+        $this->setAttributes($itemParams['price'], 'setPrice');
+
+        foreach ($this->getItemId() as $key => $item) {
+            $this->items[] = array(
+                $item => $this->getPrice($key)
+            );
+
+        }
+
+        $_SESSION['data'] = $this->items;
+
+        return $_SESSION['data'];
+    }
+
+    /**
+     * Abstract method for setting attributes
+     *
+     * @param array $params
+     * @param string $method
+     */
+    private function setAttributes($params = array(), $method = '')
+    {
+        foreach ($params as $key => $itemIdParam) {
+            $this->{$method}($itemIdParam);
+        }
+
+        return;
+    }
+
+    /**
+     * Retrieve total cost of items
+     */
+    public function getTotal()
+    {
+        echo "Total: £".number_format($_SESSION['total'], 2, '.', '');
+
+        return;
+    }
+
 }
